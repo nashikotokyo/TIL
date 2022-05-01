@@ -108,6 +108,10 @@ mailメソッドでは通常のメールと同じようにto(メールの送信�
 [![Image from Gyazo](https://i.gyazo.com/549cfd3cb873d2a90dbc58f535ec5af8.png)](https://gyazo.com/549cfd3cb873d2a90dbc58f535ec5af8)  
 [【Rails入門】Action Mailerのメール送信を初心者向けに基礎から解説](https://www.sejuku.net/blog/48739)  
   
+※メイラーにはto:オプションに配列を指定することもできるがそれは避けた方が良い。受信者に「自分以外に誰に送信されたのか」がバレてしまうので。面倒でもループで回して一人一人にメールを送信すべき。  
+これと同じような問題が起こってしまう。  
+https://www.lancers.co.jp/news/info/21226/  
+  
 # 感想
 letter_opener_webを使ったメール送信機能の実装(パスワードリセット関連の実装)は以前やったことあったので、思い出しながら復習できました。  
 Railsガイドやその他参考サイトもわかりやすく、コードリーディングの理解に特に問題は無さそうです。  
