@@ -274,10 +274,11 @@ end
 ```
 
 ## アソシエーションの場合のFactoryBotの書き方
-PostモデルがUserモデルに対してbelongs_toの関係にあり、factoryで定義している名称(user)がモデル名(user)と一致しているので、`spec/factories/posts.rb`で`user`と書くだけで`association :user, factory: :user`と同じになる。
-
-
-下記は今回のFactoryBotのテストデータ定義内容↓
+PostモデルがUserモデルに対してbelongs_toの関係にあり、factoryで定義している名称(user)がモデル名(user)と一致しているので、`spec/factories/posts.rb`で`user`と書くだけで`association :user, factory: :user`と同じになる。  
+  
+[Factorybotのアソシエーション(belongs_to)](https://qiita.com/jonson29/items/3798b79d5ca77fd711db)  
+  
+下記は今回のFactoryBotのテストデータ定義内容↓  
 ```rb
 # spec/factories/users.rb
 
@@ -307,7 +308,32 @@ FactoryBot.define do
   end
 ```
   
-[Factorybotのアソシエーション(belongs_to)](https://qiita.com/jonson29/items/3798b79d5ca77fd711db)  
+## その他
+`transient`(FactoryBot)という実際に作成するデータと直接関係無い新しいattributeを定義する機能もある。  
+そこで定義されたものは実際のmodelにはセットされないしattributes_forでも出力されない。何のために使うかというと作成時に挙動を変更するためのフラグや追加データとして利用するのが一般的。  
+```
+factory :user do
+  transient do
+    rockstar true
+    upcased  false
+  end
+
+  name  { "John Doe#{" - Rockstar" if rockstar}" }
+  email { "#{name.downcase}@example.com" }
+
+  after(:create) do |user, evaluator|
+    user.name.upcase! if evaluator.upcased
+  end
+end
+
+
+# 以下により、userのfactoryが生成されるだけでなく、name属性が大文字になる
+# => "JOHN DOE - ROCKSTAR"
+create(:user, upcased: true).name
+```
+[FactoryGirlのinheritanceやtransientの確認をする](https://woshidan.hatenablog.com/entry/2014/09/15/002017)
+  
+
   
 # 感想
 以前1回RSpecで書いたことはありましたが、今回ほど細かくは見なかったので、復習するいい機会になりました。  
