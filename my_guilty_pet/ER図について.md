@@ -254,6 +254,7 @@
   - user_id
   - pet_id(登録ペットとの紐付け)
   - image(最終的に出来上がった画像を格納)
+  - body(本文)
 
 - comments
   - user_id
@@ -263,3 +264,7 @@
 - likes
   - user_id
   - post_id
+
+- templates
+  - name(テンプレートの名前)
+  - question(画像に埋め込むユーザー入力値を得るための質問をJSONで入れる)
