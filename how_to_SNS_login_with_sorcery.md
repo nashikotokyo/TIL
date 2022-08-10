@@ -79,9 +79,16 @@ sorcery によるTwitter認証は、アプリからsorceryを経由してTwitter
     取得方法は[こちら](https://blog.suzukaji.com/programming/application-twitter-api/)を参照  
     ※use caseはそれぞれ目的によって変わる  
     ※keyやsecretは漏洩しないよう保管する
-  - `callback_url`(ユーザーが認証画面で「許可する」を押した後のcallbackメソッドを実行する為のURL)をTwitter Developer側に設定しておく必要がある  
-    `http://localhost:3000/oauth/twitter/callback`と設定(callbackメソッドやルーティングの設定は後ほど記載)  
+  - `callback_url`(ユーザーが認証画面で「許可する」を押した後のcallbackメソッドを実行する為のURL)をTwitter Developer側に設定しておく    
+    `http://127.0.0.1:3000/oauth/twitter/callback`と設定(callbackメソッドやルーティングの設定は後ほど記載)  
     設定方法は[こちらの手順2](https://di-acc2.com/system/rpa/9688/)を参照  
+    ※[公式の説明](https://developer.twitter.com/en/docs/apps/callback-urls)に以下のようにあるため127.0.0.1とした。
+    ```
+    Don’t use localhost as a callback URL
+    Instead of using localhost, please use a custom host locally or http(s)://127.0.0.1
+    ```
+    ※`ローカルでアプリにアクセスする際はlocalhost:3000ではなく127.0.0.1:3000にアクセスする点に注意。`  
+    [Twitterログイン 401 Authorization Required](https://qiita.com/niwa1903/items/2d6a3e9c103652d88538)  
     ※今回はOauth2.0をonにした  
     ※App Typeはアプリにより異なるが、今回は`Web App`を選択した  
     ※Website URLはまだないので仮で`https://twitter.com/`と設定しておいた。決まり次第変更が必要。  
@@ -115,7 +122,7 @@ sorcery によるTwitter認証は、アプリからsorceryを経由してTwitter
     twitter:
       access_key: <%= Rails.application.credentials.twitter[:access_key] %> # 上記でcredentialsに登録したものを取得し設定
       secret_key: <%= Rails.application.credentials.twitter[:secret_key] %> # 上記でcredentialsに登録したものを取得し設定
-      callback_url: http://localhost:3000/oauth/twitter/callback # 上記でTwitter Developersに登録しておいたものと同じURLを設定
+      callback_url: http://127.0.0.1:3000/oauth/twitter/callback # 事前にTwitter Developersに登録しておいたものと同じURLを設定
     ```
     取得は以下のようにできる。  
     ```rb
@@ -234,3 +241,142 @@ sorcery によるTwitter認証は、アプリからsorceryを経由してTwitter
 - ユーザー情報からメールアドレス取得したい場合は別途追加設定が必要。  
 設定方法は冒頭の参考にしたサイトに書いてある
 - 今回は開発環境しか考慮してないので本番用の設定(config/settings/production.ymlなど)が必要
+  
+  
+# LINE認証の追加
+Twitterログインの実装後LINEログインを追加した  
+  
+## 手順
+- [LINE Messaging APIのプロバイダーとチャネルを作成する方法](https://www.yukibnb.com/entry/linemessagingapi_account) を参考にLINE Developersに登録、`チャネルID`と`チャネルシークレット`を取得する  
+- LINE DevelopersにCallback URLを設定する  
+  [コールバックURLを設定する](https://developers.line.biz/ja/docs/line-login/integrate-line-login/#setting-callback-url)  
+  <ハマりポイント>  
+  localhostだと弾かれて使えないのでTwitter認証同様に127.0.0.1にする必要があった。  
+  [![Image from Gyazo](https://i.gyazo.com/a7503ec6768930a4ae65aff3b4f4928c.png)](https://gyazo.com/a7503ec6768930a4ae65aff3b4f4928c)  
+  [![Image from Gyazo](https://i.gyazo.com/02b389d3fd2b1b62e704820c8c4519ef.png)](https://gyazo.com/02b389d3fd2b1b62e704820c8c4519ef)  
+  ※Twitter認証同様`ローカルでアプリにアクセスする際はlocalhost:3000ではなく127.0.0.1:3000にアクセスする点に注意。`  
+- https通信できるように設定する  
+　 [mkcertでローカルホストをSSL化して動作確認](https://qiita.com/tarakish/items/a4c73104375878ad61c5#8mkcert%E3%81%A7%E3%83%AD%E3%83%BC%E3%82%AB%E3%83%AB%E3%83%9B%E3%82%B9%E3%83%88%E3%82%92ssl%E5%8C%96%E3%81%97%E3%81%A6%E5%8B%95%E4%BD%9C%E7%A2%BA%E8%AA%8D)にあるようにあるようにLINE認証の場合は、https通信でないと動作してくれないため動作確認のためにmkcertとpumaを使う方法でSSL化する必要がある。  
+  [アプリケーションにhttpsでアクセスできるように設定する](https://qiita.com/t12u/items/52721d3ea2ce1e605ae9#%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E3%81%ABhttps%E3%81%A7%E3%82%A2%E3%82%AF%E3%82%BB%E3%82%B9%E3%81%A7%E3%81%8D%E3%82%8B%E3%82%88%E3%81%86%E3%81%AB%E8%A8%AD%E5%AE%9A%E3%81%99%E3%82%8B)を参考に、`localhost`が使えないのでその部分を`127.0.0.1`に読み替えて設定。  
+  ※`mkcert localhost`でなく`mkcert 127.0.0.1`を実行  
+  ※puma.rbには以下のように設定  
+  ```rb
+  ssl_bind "0.0.0.0", "3000", {
+    cert: "config/certs/127.0.0.1.pem",
+    key:  "config/certs/127.0.0.1-key.pem"
+  }
+  ```
+  ※アプリへのアクセスは`https://localhost:3000`ではなく`https://127.0.0.1:3000`にすることに注意  
+- [【Rails】Sorceryで外部認証 〜LINE編〜](https://qiita.com/tarakish/items/a4c73104375878ad61c5#6-sorceryrb%E3%81%AE%E8%A8%AD%E5%AE%9A)を参考に`sorcery.rb`、`config/settings/development.yml`、`config/credentials.yml.enc`をTwitterの時と同様に以下のように設定していく  
+  ```yml
+  # config/credentials.yml.enc
+  line:
+    access_key: XXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    secret_key: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+  ```
+  ```yml
+  # config/settings/development.yml
+  line:
+    access_key: <%= Rails.application.credentials.line[:access_key] %>
+    secret_key: <%= Rails.application.credentials.line[:secret_key] %>
+    callback_url: https://127.0.0.1:3000/oauth/line/callback
+  ```
+  ```rb
+  # config/initializers/sorcery.rb
+  Rails.application.config.sorcery.submodules = [:external]
+  
+  Rails.application.config.sorcery.configure do |config|
+  ...
+    config.external_providers = [:twitter, :line]
+    
+    ... 
+    config.line.key = Settings.line.access_key
+    config.line.secret = Settings.line.secret_key
+    config.line.callback_url = Settings.line.callback_url
+    config.line.scope = "profile"
+    # config.line.bot_prompt = "normal"
+    config.line.user_info_mapping = {
+      username: 'displayName'
+    }
+    ...
+  end
+  ```
+- ボタンの設置
+  ```rb
+  <%= link_to auth_at_provider_path(provider: :line), class: 'btn btn-success d-flex align-items-center justify-content-center p-3 m-2' do %>
+    <i class="fa-brands fa-line fa-2x"></i>
+    <div class="flex-grow-1">
+      LINEでログイン
+    </div>
+  <% end %>
+  ```
+- LINE認証では`http`から`https`に変更したのでTwitter認証の方も合わせてCallback URLの設定を以下のように変更しておく
+  ```yml
+  # config/settings/development.yml
+  twitter:
+    access_key: <%= Rails.application.credentials.twitter[:access_key] %>
+    secret_key: <%= Rails.application.credentials.twitter[:secret_key] %>
+    callback_url: https://127.0.0.1:3000/oauth/twitter/callback
+  ```
+  Twitter Developer側の設定  
+  [![Image from Gyazo](https://i.gyazo.com/82e00d02e8b58b97dd1fa4c71b692d7e.png)](https://gyazo.com/82e00d02e8b58b97dd1fa4c71b692d7e)  
+  
+# Google認証の追加
+Twitter、LINE認証と同様の実装方法。  
+[【Rails】Sorceryで外部認証 〜Google編〜](https://qiita.com/tarakish/items/8e61106fa2473a9d97e8)参照  
+※`config.google.scope`については[Google API の OAuth 2.0 スコープ](https://developers.google.com/identity/protocols/oauth2/scopes#oauth2)参照。  
+以下のように実装。  
+```yml
+# config/credentials.yml.enc
+google:
+  access_key: XXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+  secret_key: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+```
+```yml
+# config/settings/development.yml
+google:
+  access_key: <%= Rails.application.credentials.google[:access_key] %>
+  secret_key: <%= Rails.application.credentials.google[:secret_key] %
+  callback_url: https://127.0.0.1:3000/oauth/google/callback
+```
+```rb
+# config/initializers/sorcery.rb
+Rails.application.config.sorcery.submodules = [:external]
+  
+Rails.application.config.sorcery.configure do |config|
+...
+  config.external_providers = [:twitter, :line]
+    
+  ... 
+  config.google.key = Settings.google.access_key
+  config.google.secret = Settings.google.secret_key
+  config.google.callback_url = Settings.google.callback_url
+  config.google.user_info_mapping = {
+    username: "name"
+  }
+  config.google.scope = "https://www.googleapis.com/auth/userinfo.profile"
+  ...
+end
+```
+```rb
+# app/views/user_sessions/new.html.erb(ボタンの設置)
+<%= link_to auth_at_provider_path(provider: :google), class: 'btn btn-danger d-flex align-items-center justify-content-center p-3 m-2' do %>
+  <i class="fa-brands fa-google fa-2x"></i>
+  <div class="flex-grow-1">
+    Googleでログイン
+  </div>
+<% end %>
+```
+# その他追加対応
+- Twitter認証のキャンセル後の401エラーの解消  
+  Twitter認証画面に遷移後キャンセルを押すと401エラーが出てしまうのでoauthsコントローラーに以下を追加した  
+  ```rb
+  # oauthsコントローラ
+  def callback
+    return redirect_to root_path, warning: 'ログインをキャンセルしました' if params[:error] || params[:denied]
+  ```
+  [キャンセル後のリダイレクト処理](https://blog.aiandrox.com/posts/tech/2020/03/29/#キャンセル後のリダイレクト処理)  
+  
+- ログアウト機能とボタンの実装  
+  user_sessionsコントローラにdestroyアクションを実装、ヘッダにログアウトボタンを設置  
+ 
