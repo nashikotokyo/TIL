@@ -102,8 +102,7 @@ meta:
   title: InstaClone - Railsの実践的アプリケーション
   description: Ruby on Railsの実践的な課題です。Sidekiqを使った非同期処理やトランザクションを利用した課金処理など実践的な内容が学べます。
   # yamlファイルで-(ハイフン)は配列を作る
-  keywords:ngrokについて
-  https://qiita.com/mininobu/items/b45dbc70faedf30f484e
+  keywords:
     - Rails
     - InstaClone
     - Rails特訓コース
